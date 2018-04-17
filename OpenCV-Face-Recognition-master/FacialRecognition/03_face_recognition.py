@@ -9,6 +9,8 @@ Developed by Marcelo Rovai - MJRoBot.org @ 21Feb18
 '''
 
 import datetime
+import time
+
 import cv2
 import numpy as np
 import os
@@ -54,6 +56,7 @@ while True:
 
     ret, img =cam.read()
     img = cv2.flip(img, -1) # Flip vertically
+    imgEx = cv2.flip(img, 1)
 
     gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
 
@@ -64,56 +67,37 @@ while True:
         minSize = (int(minW), int(minH)),
        )
     
+        #break    
+    if approvedUser == False : 
+        for(x,y,w,h) in faces:
 
-    for(x,y,w,h) in faces:
+            cv2.rectangle(img, (x,y), (x+w,y+h), (0,255,0), 2)
 
-        cv2.rectangle(img, (x,y), (x+w,y+h), (0,255,0), 2)
-
-        id, confidence = recognizer.predict(gray[y:y+h,x:x+w])
+            id, confidence = recognizer.predict(gray[y:y+h,x:x+w])
 
         # Check if confidence is less them 100 ==> "0" is perfect match 
-        if (confidence < 100):
-            approvedUser = True
-            id = names[id]
-            confidence = "  {0}%".format(round(100 - confidence))
+            if (confidence < 100):
+                approvedUser = True
+                id = names[id]
+                confidence = "  {0}%".format(round(100 - confidence))
             
-        else:
-            id = "unknown"
-            confidence = "  {0}%".format(round(100 - confidence))
+            else:
+                id = "unknown"
+                confidence = "  {0}%".format(round(100 - confidence))
         
-        cv2.putText(img, str(id), (x+5,y-5), font, 1, (255,255,255), 2)
-        cv2.putText(img, str(confidence), (x+5,y+h-5), font, 1, (255,255,0), 1)
-        
+            cv2.putText(img, str(id), (x+5,y-5), font, 1, (255,255,255), 2)
+            cv2.putText(img, str(confidence), (x+5,y+h-5), font, 1, (255,255,0), 1)
+            
         
     if approvedUser == True :
-        print("Open Device")
-        break
-    
-    cv2.imshow('camera',img)
-
-    k = cv2.waitKey(10) & 0xff # Press 'ESC' for exiting video
-    if k == 27:
-        break
-
-cmd = input('\n enter you command for the camera <return> ==>  ')
-while approvedUser:
-    
-    if cmd == "Take pic":
-        ret,img = cam.read()
-        
-        cv2.imshow('camera',img)
-        cv2.imwrite(str(timeStamp) + ".jpg", img)
-        
+        cv2.imwrite(str(timeStamp) + ".jpg", imgEx)
         f = drive.CreateFile({"parents": [{"kind": "drive#fileLink", "id": id_path}]})
         f.SetContentFile(str(timeStamp) + ".jpg")
         f.Upload()
-        
-        print("Talking a picture")
         break
-    else:
-        print("Sorry cmd not found")
-    
-    
+        
+    cv2.imshow('camera',img)
+
     k = cv2.waitKey(10) & 0xff # Press 'ESC' for exiting video
     if k == 27:
         break
