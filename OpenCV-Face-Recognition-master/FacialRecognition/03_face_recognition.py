@@ -10,7 +10,7 @@ Developed by Marcelo Rovai - MJRoBot.org @ 21Feb18
 
 import datetime
 import time
-
+import serial
 import cv2
 import numpy as np
 import os
@@ -18,6 +18,8 @@ import os
 from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
 
+ser=serial.Serial("/dev/ttyACM0", 9600)
+ser.baudrate=9600
 
 recognizer = cv2.face.LBPHFaceRecognizer_create()
 recognizer.read('trainer/trainer.yml')
@@ -52,12 +54,16 @@ id_path = '1ddy8S_BBeZBc5hN5Q6bPuh6D-kys59gU'
 
 timeStamp = datetime.datetime.now()
 
+read_ser=0
+print("Begin")
+
 while True:
+    print("Reading...")
 
     ret, img =cam.read()
     img = cv2.flip(img, -1) # Flip vertically
     imgEx = cv2.flip(img, 1)
-
+    
     gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
 
     faces = faceCascade.detectMultiScale( 
@@ -67,7 +73,8 @@ while True:
         minSize = (int(minW), int(minH)),
        )
     
-        #break    
+        #break
+        
     if approvedUser == False : 
         for(x,y,w,h) in faces:
 
@@ -89,7 +96,10 @@ while True:
             cv2.putText(img, str(confidence), (x+5,y+h-5), font, 1, (255,255,0), 1)
             
         
-    if approvedUser == True :
+    if approvedUser == True:
+        read_ser=ser.readline()
+        print(read_ser)
+        print("Approved")
         cv2.imwrite(str(timeStamp) + ".jpg", imgEx)
         f = drive.CreateFile({"parents": [{"kind": "drive#fileLink", "id": id_path}]})
         f.SetContentFile(str(timeStamp) + ".jpg")
@@ -100,7 +110,7 @@ while True:
 
     k = cv2.waitKey(10) & 0xff # Press 'ESC' for exiting video
     if k == 27:
-        break
+        break 
 
 # Do a bit of cleanup
 print("\n [INFO] Exiting Program and cleanup stuff")
