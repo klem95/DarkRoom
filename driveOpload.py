@@ -1,3 +1,4 @@
+import datetime
 import cv2
 import os
 from pydrive.auth import GoogleAuth
@@ -6,13 +7,16 @@ from pydrive.drive import GoogleDrive
 gauth = GoogleAuth()
 drive = GoogleDrive(gauth)
 
+timeStamp = datetime.datetime.now()
+
+
 cam = cv2.VideoCapture(0)
 cam.set(3, 640) # set video width
 cam.set(4, 480) # set video height
 
 ret,img = cam.read()
 
-cv2.imwrite("party2.jpg", img)
+cv2.imwrite(str(timeStamp) + ".jpg", img)
 cv2.imshow('image', img)
 
 id_path = '1ddy8S_BBeZBc5hN5Q6bPuh6D-kys59gU'
@@ -26,5 +30,5 @@ id_path = '1ddy8S_BBeZBc5hN5Q6bPuh6D-kys59gU'
 
 
 f = drive.CreateFile({"parents": [{"kind": "drive#fileLink", "id": id_path}]})
-f.SetContentFile("party2.jpg")
+f.SetContentFile(str(timeStamp) + ".jpg")
 f.Upload()
