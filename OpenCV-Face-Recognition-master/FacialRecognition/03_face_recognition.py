@@ -8,12 +8,14 @@ Developed by Marcelo Rovai - MJRoBot.org @ 21Feb18
 
 '''
 
+import datetime
 import cv2
 import numpy as np
 import os
 
 from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
+
 
 recognizer = cv2.face.LBPHFaceRecognizer_create()
 recognizer.read('trainer/trainer.yml')
@@ -41,10 +43,12 @@ minH = 0.1*cam.get(4)
 approvedUser = False
 
 # Google API
-#gauth = GoogleAuth()
-#gauth.LocalWebserverAuth()
+gauth = GoogleAuth()
+drive = GoogleDrive(gauth)
 
-#drive = GoogleDriver(gauth)
+id_path = '1ddy8S_BBeZBc5hN5Q6bPuh6D-kys59gU'
+
+timeStamp = datetime.datetime.now()
 
 while True:
 
@@ -95,6 +99,15 @@ cmd = input('\n enter you command for the camera <return> ==>  ')
 while approvedUser:
     
     if cmd == "Take pic":
+        ret,img = cam.read()
+        
+        cv2.imshow('camera',img)
+        cv2.imwrite(str(timeStamp) + ".jpg", img)
+        
+        f = drive.CreateFile({"parents": [{"kind": "drive#fileLink", "id": id_path}]})
+        f.SetContentFile(str(timeStamp) + ".jpg")
+        f.Upload()
+        
         print("Talking a picture")
         break
     else:
@@ -109,3 +122,4 @@ while approvedUser:
 print("\n [INFO] Exiting Program and cleanup stuff")
 cam.release()
 cv2.destroyAllWindows()
+
