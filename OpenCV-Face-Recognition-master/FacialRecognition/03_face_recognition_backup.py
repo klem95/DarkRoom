@@ -46,9 +46,6 @@ minH = 0.1*cam.get(4)
 # Trigger
 approvedUser = False
 
-# Alcometer trigger
-drunk = True;
-
 # Google API
 gauth = GoogleAuth()
 drive = GoogleDrive(gauth)
@@ -104,20 +101,8 @@ while True:
         print(read_ser)
         print("Approved")
         cv2.imwrite(str(timeStamp) + ".jpg", imgEx)
-        
-        if drunk == False:
-            f = drive.CreateFile({"parents": [{"kind": "drive#fileLink", "id": id_path}]})
-            f.SetContentFile(str(timeStamp) + ".jpg")
-
-        else:
-            drunk_image = cv2.imread(str(timeStamp) + ".jpg")
-            blurImg = cv2.blur(drunk_image,(30, 30)) # Kernel size
-            cv2.imwrite("blur" + str(timeStamp) + ".jpg", blurImg)
-            f = drive.CreateFile({"parents": [{"kind": "drive#fileLink", "id": id_path}]})
-            f.SetContentFile("blur" + str(timeStamp) + ".jpg")
-            drunk = False
-    
-
+        f = drive.CreateFile({"parents": [{"kind": "drive#fileLink", "id": id_path}]})
+        f.SetContentFile(str(timeStamp) + ".jpg")
         f.Upload()
         break
         
