@@ -47,7 +47,10 @@ minH = 0.1*cam.get(4)
 approvedUser = False
 
 # Alcometer trigger
-drunk = True;
+drunk = False;
+
+# Distance sensor trigger
+takeImg = False
 
 # Google API
 gauth = GoogleAuth()
@@ -57,11 +60,13 @@ id_path = '1ddy8S_BBeZBc5hN5Q6bPuh6D-kys59gU'
 
 timeStamp = datetime.datetime.now()
 
+numberRecieved = 0
+
 read_ser=0
 print("Begin")
 
 while True:
-    print("Reading...")
+    #print("Reading...")
 
     ret, img =cam.read()
     img = cv2.flip(img, -1) # Flip vertically
@@ -77,7 +82,19 @@ while True:
        )
     
         #break
+    read_ser = ser.readline()
+    if (len(read_ser) != 0):
+        numberRecieved = int(read_ser)
         
+    print(numberRecieved)
+    if(numberRecieved == 2):
+        drunk = True
+ 
+    if(numberRecieved == 1):
+        takeImg = True
+    else:
+        takeImg = False
+   
     if approvedUser == False : 
         for(x,y,w,h) in faces:
 
@@ -99,7 +116,7 @@ while True:
             cv2.putText(img, str(confidence), (x+5,y+h-5), font, 1, (255,255,0), 1)
             
         
-    if approvedUser == True:
+    if approvedUser == True & takeImg == True:
         read_ser=ser.readline()
         print(read_ser)
         print("Approved")
